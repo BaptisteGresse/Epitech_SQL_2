@@ -1,0 +1,143 @@
+CREATE DATABASE pokemon_sql;
+USE pokemon_sql;
+
+-- creation de tables --
+
+CREATE TABLE POKEMON (
+    PO_ID INT NOT NULL AUTO_INCREMENT,
+    PO_NAME VARCHAR(14),
+    PO_TYPE VARCHAR(14),
+    PO_PV INT,
+    PRIMARY KEY(PO_ID)
+)ENGINE=INNODB;
+
+--ㅤ* to * --
+
+CREATE TABLE EQUIPE (
+    EQ_ID INT NOT NULL AUTO_INCREMENT,
+    EQ_NBPPLACE INT(6),
+    EQ_NAME VARCHAR(14),
+    EQ_LEVEL INT NOT NULL,
+    PRIMARY KEY(EQ_ID)
+)ENGINE=INNODB;
+
+-- 1 to * --
+
+CREATE TABLE PERSONNAGE (
+    PE_ID INT NOT NULL AUTO_INCREMENT,
+    PE_NAME VARCHAR(14),
+    PE_LEVEL INT NOT NULL,
+    PE_EQUIPE_FK INT,
+    FOREIGN KEY(PE_EQUIPE_FK)
+        REFERENCES EQUIPE(EQ_ID),
+    PRIMARY KEY(PE_ID)
+)ENGINE = INNODB;
+
+-- 1 to 1 --
+
+CREATE TABLE INVENTAIRE (
+    IN_ID INT NOT NULL AUTO_INCREMENT,
+    IN_ITEMSOIN INT NOT NULL,
+    IN_POKEDEX INT(1),
+    IN_PERSONNAGE_FK INT UNIQUE,
+    FOREIGN KEY(IN_PERSONNAGE_FK)
+        REFERENCES PERSONNAGE(PE_ID),
+    PRIMARY KEY(IN_ID)
+)ENGINE=INNODB;
+
+-- table d'associtation pokemon et quipe --
+
+CREATE TABLE TRANSITION ( 
+    TR_POKEMON_FK INT NOT NULL,
+    FOREIGN KEY(TR_POKEMON_FK)
+        REFERENCES POKEMON(PO_ID),
+    TR_EQUIPE_FK INT NOT NULL,
+    FOREIGN KEY(TR_EQUIPE_FK)
+        REFERENCES EQUIPE(EQ_ID),
+    PRIMARY KEY (TR_POKEMON_FK, TR_EQUIPE_FK)
+)ENGINE=INNODB;
+
+-- fin de creation de tables -- 
+
+-- add value --
+
+INSERT INTO POKEMON (PO_NAME, PO_TYPE, PO_PV) VALUES
+    ("Pikachu", "electric", 60),
+    ("ronflex", "sol", 120),
+    ("miaous", "force", 30),
+    ("salameche", "feu", 30),
+    ("tortipousse", "feuille", 20);
+
+INSERT INTO PERSONNAGE (PE_NAME, PE_LEVEL) VALUES
+    ("BAPTISTE", 100),
+    ("EMERIC", 50),
+    ("SOLO", 10),
+    ("RS", 1000),
+    ("ENZ0", -1),
+    ("SAFIA", 999),
+    ("PAVOT", 70),
+    ("AYMEN", 34);
+
+INSERT INTO EQUIPE (EQ_NBPPLACE, EQ_NAME, EQ_LEVEL) VALUES
+    (5, "blueTeam", 20),
+    (6, "redTeam", 35),
+    (4, "orangeTeam", 38),
+    (2, "blackTeam", 57),
+    (1, "pinkTeam", 42),
+    (3, "purpleTeam", 93),
+    (5, "yellowTeam", 12);
+
+INSERT INTO INVENTAIRE (IN_ITEMSOIN, IN_POKEDEX) VALUES
+    (3, 0),
+    (5, 1),
+    (7, 0),
+    (1, 1),
+    (0, 1),
+    (2, 1);
+
+INSERT INTO TRANSITION (TR_POKEMON_FK, TR_EQUIPE_FK) VALUES
+    (1, 2),
+    (2, 1),
+    (3, 5),
+    (4, 3),
+    (5, 2),
+    (6, 1);
+
+-- stop value --
+
+-- Different request -- 
+
+SELECT * FROM PERSONNAGE;
+SELECT PE_NAME FROM PERSONNAGE;
+SELECT * FROM EQUIPE WHERE EQ_NBPPLACE = 2;
+SELECT PE_ID FROM PERSONNAGE  WHERE PE_NAME BETWEEN "BAPTISTE" AND 'ENZO';
+
+
+--  MANY TO 1 INNER JOIN
+
+-- nom level et l'equipe appartenant --
+SELECT PE_ID,PE_NAME,PE_LEVEL,EQ_NAME FROM EQUIPE INNER JOIN PERSONNAGE 
+ON EQ_ID = PE_EQUIPE_FK;
+
+SELECT PE_ID,PE_NAME,PE_LEVEL FROM EQUIPE INNER JOIN PERSONNAGE 
+ON EQ_ID = PE_EQUIPE_FK AND EQ_NAME = "blackTeam";
+
+-- nom et pokedex -- 
+SELECT PE_NAME,IN_POKEDEX FROM PERSONNAGE INNER JOIN INVENTAIRE 
+ON PE_ID = IN_ID;
+
+SELECT PE_NAME,IN_POKEDEX FROM PERSONNAGE LEFT JOIN INVENTAIRE 
+ON PE_ID = IN_ID;
+
+--  pokemon et la team -- 
+SELECT PO_ID,PO_NAME,PO_TYPE,EQ_LEVEL,EQ_NAME FROM EQUIPE INNER JOIN 
+POKEMON ON EQ_ID = PO_ID;
+
+-- toute les valeurs de personnage et de pokemon -- 
+
+SELECT * FROM PERSONNAGE INNER JOIN POKEMON ON PE_ID=PO_ID;
+
+-- les item soin affecter au perssonage -- 
+
+SELECT IN_ITEMSOIN, PE_NAME FROM INVENTAIRE INNER JOIN PERSONNAGE;
+
